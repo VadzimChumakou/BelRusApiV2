@@ -9,6 +9,9 @@
         public int PatryCardStatusId { get; set; }
         public int PartyEntryPlaceId { get; set; }
         public int RegistrationPlaceId { get; set; }
+        public DateTime Birdhday { get; set; }
+        public DateTime DateStart { get; set; }
+
         public int EducationId { get; set; }
         public int SocialCategoryId { get; set; }
         public int ActivitySphereId { get; set; }

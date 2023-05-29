@@ -1,7 +1,31 @@
 using BelRusApiV2.Models.EfModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("systemAdminPolicy", policy =>
+    {
+        policy.RequireClaim(ClaimTypes.Role, "Администратор системы");
+    });
+    options.AddPolicy("uzelAdminPolicy", policy =>
+    {
+        policy.RequireClaim(ClaimTypes.Role, "Администратор узла");
+    });
+    options.AddPolicy("operatorPolicy", policy =>
+    {
+        policy.RequireClaim(ClaimTypes.Role, "Оператор");
+    });
+    options.AddPolicy("userPolisy", policy =>
+    {
+        policy.RequireClaim(ClaimTypes.Role, "Пользователь");
+    });
+});
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
@@ -26,6 +50,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 //app.UseCors("CorsPolicy");
 app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 app.UseAuthorization();

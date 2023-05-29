@@ -1,10 +1,15 @@
 using BelayaRuswebApi.Models.ViewModels;
 using BelRusApiV2.Models.EfModels;
 using BelRusApiV2.Models.ViewModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Net;
+using System.Security.Claims;
 using WebApplication1.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BelayaRuswebApi.Controllers
 {
@@ -12,7 +17,7 @@ namespace BelayaRuswebApi.Controllers
     [Route("[controller]")]
     public class UserPageController : ControllerBase
     {
-
+        
         [HttpPost]
         [Route("Search")]
         public IActionResult SearchUser(SearchVm card)
@@ -23,6 +28,9 @@ namespace BelayaRuswebApi.Controllers
             if (!string.IsNullOrEmpty(card.Name)) filtered = filtered.Where(x => x.Name == card.Name).ToList();
             if (!string.IsNullOrEmpty(card.Surname)) filtered = filtered.Where(x => x.Surname == card.Surname).ToList();
             if (!string.IsNullOrEmpty(card.Patronymic)) filtered = filtered.Where(x => x.Patronymic == card.Patronymic).ToList();
+            if (!string.IsNullOrEmpty(card.Patronymic)) filtered = filtered.Where(x => x.Patronymic == card.Patronymic).ToList();
+            //if (!string.IsNullOrEmpty(card.Birdhday)) filtered = filtered.Where(x => x.Birhday == card.Birdhday).ToList();
+            //if (!string.IsNullOrEmpty(card.DateStart)) filtered = filtered.Where(x => x.PartyEntryDate == card.DateStart).ToList();
             if (card.PartyÑardNumber != 0) filtered = filtered.Where(x => x.PartyÑardNumber == card.PartyÑardNumber).ToList();
             if (card.PartyEntryPlaceId != 0) filtered = filtered.Where(x => x.PartyEntryPlaceId == card.PartyEntryPlaceId).ToList();
             if (card.PatryCardStatusId != 0) filtered = filtered.Where(x => x.PartyCardStatusId == card.PatryCardStatusId).ToList();
@@ -125,6 +133,17 @@ namespace BelayaRuswebApi.Controllers
                 ContactInformation = newContactInfo,
                 LastUpdateDate = DateTime.Today
             };
+            var uzl = new Uzel();
+            using(BelayaRusV5Context  db = new BelayaRusV5Context())
+            {
+                uzl = db.Uzels.FirstOrDefault(u => u.Id == newCard.PartyEntryPlaceId);
+            }
+            ChleniUzla addMbr = new ChleniUzla
+            {
+                Member = newCard,
+                Uzel = uzl,
+                Role = 1
+            };
             //2 paus 3 stop
 
             using (BelayaRusV5Context db = new BelayaRusV5Context())
@@ -148,7 +167,8 @@ namespace BelayaRuswebApi.Controllers
                     };
                     db.KickedMembers.Add(kicked);
                 }
-                newCard.PartyÑardNumber = numCrd; 
+                newCard.PartyÑardNumber = numCrd;
+                db.ChleniUzlas.Add(addMbr);
                 db.AccountCards.Add(newCard);
                 db.SaveChanges();
             }
@@ -156,6 +176,7 @@ namespace BelayaRuswebApi.Controllers
             return Ok();
         }
         [HttpGet]
+        //[Authorize(Policy = "Ïîëüçîâàòåëü")]
         [Route("tablePOO")]
         public IActionResult POO()
         {

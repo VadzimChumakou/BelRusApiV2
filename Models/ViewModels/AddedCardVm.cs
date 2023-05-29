@@ -2,8 +2,7 @@
 {
     public class AddedCardVm
     {
-        //public int id { get; set; }
-
+        public int id { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
         public string Parent { get; set; }
